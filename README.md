@@ -1,3 +1,7 @@
+# Squawk
+
+Credits to ma9ici4n for [original bird sprite art](https://ma9ici4n.itch.io/pixel-art-bird-16x16), extended sprite art created by me
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
