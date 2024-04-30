@@ -1,7 +1,7 @@
 import { Component } from 'ape-ecs';
 import { Texture, AnimatedSprite } from 'pixi.js';
 
-class CAnimatedSprite extends Component {
+export class CAnimatedSprite extends Component {
   textures: Texture[];
   textureStates: { [k: string]: Texture[] };
 
@@ -10,5 +10,3 @@ class CAnimatedSprite extends Component {
     textureStates: undefined as { [k: string]: Texture[] },
   };
 }
-
-export default CAnimatedSprite;

@@ -4,7 +4,7 @@ import { Text } from 'pixi.js';
 /**
  * @deprecated Use CTextBubble. I don't know ECS design principles
  */
-class CText extends Component {
+export class CText extends Component {
   text: Text;
   message: string;
 
@@ -13,5 +13,3 @@ class CText extends Component {
     message: undefined as string,
   };
 }
-
-export default CText;

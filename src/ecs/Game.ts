@@ -1,24 +1,30 @@
 import { Application, ICanvas, Ticker } from 'pixi.js';
-import { useTick } from '@pixi/react';
 import { World } from 'ape-ecs';
 import {
   Tags,
   CAnimatedSprite,
   CSprite,
   CPosition,
+  CVelocity,
   CGame,
   CType,
-  CText,
   CTextBubble,
+  PositionAnchor,
+  CPositionAt,
 } from './components';
-import { RunType, SendTextSystem, SpriteSystem } from './systems';
+import {
+  PhysicsSystem,
+  RunType,
+  SendTextSystem,
+  SpriteSystem,
+} from './systems';
 import loadPetTextures from '../utils/loadPetTextures';
-import CVelocity from './components/CVelocity';
 
 class Game {
   app: Application<ICanvas>;
   size: { width: number; height: number };
   ecs: World;
+  dt: number;
 
   constructor(options: {
     app: Application<ICanvas>;
@@ -33,8 +39,8 @@ class Game {
     this.ecs.registerComponent(CSprite);
     this.ecs.registerComponent(CAnimatedSprite);
     this.ecs.registerComponent(CPosition);
+    this.ecs.registerComponent(CPositionAt);
     this.ecs.registerComponent(CVelocity);
-    this.ecs.registerComponent(CText);
     this.ecs.registerComponent(CTextBubble);
 
     this.createGameEntity();
@@ -42,11 +48,16 @@ class Game {
 
     this.ecs.registerSystem(RunType.tick, SpriteSystem);
     this.ecs.registerSystem(RunType.tick, SendTextSystem);
+    this.ecs.registerSystem(RunType.tick, PhysicsSystem);
 
     // TODO: Add event listeners here? Good for mouse press types
   }
 
-  ticker = (delta: number, ticker: Ticker): void => {
+  onTick = (delta: number, ticker: Ticker): void => {
+    // delta represents number of frames b/w last call and this one
+    // delta is roughly 1, but can be a decimal based on time
+    // By default, everything runs at 60fps, so 1 frame is 16.67 milliseconds
+    this.dt = delta;
     this.ecs.tick();
     this.ecs.runSystems(RunType.tick);
   };
@@ -92,7 +103,7 @@ class Game {
           y: 150,
         },
       ],
-      tags: [Tags.New],
+      tags: [Tags.new, Tags.interactiveSprite],
     });
   }
 
@@ -107,13 +118,14 @@ class Game {
           message: message,
         },
         {
-          type: CType.CPosition,
-          key: 'cPosition',
-          x: this.size.width / 2,
-          y: this.size.height - 200,
+          type: CType.CPositionAt,
+          key: 'cPositionAt',
+          anchor: PositionAnchor.BOTTOM_RIGHT,
+          x: this.size.width - 20,
+          y: this.size.height - 20,
         },
       ],
-      tags: [Tags.New],
+      tags: [Tags.new],
     });
   }
 }

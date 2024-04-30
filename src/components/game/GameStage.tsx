@@ -22,7 +22,7 @@ const GameCore = ({
     gameRef.current.sendMessage(lastMessage);
   }, [lastMessage]);
 
-  useTick(gameRef.current.ticker);
+  useTick(gameRef.current.onTick);
 
   return <Container x={150} y={150}></Container>;
 };
@@ -37,6 +37,7 @@ export const GameStage = ({ lastMessage }: { lastMessage: string }) => {
     setMessageLog(newMessageLog);
   }, [lastMessage]);
 
+  // TODO: Add an event listener for size changing (e.g. screen tilted sideways)
   const size = {
     width: Math.min(window.innerWidth, smSize),
     height: window.innerHeight - 40,

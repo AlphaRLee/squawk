@@ -1,1 +1,1 @@
-export const textureScale = 4;
+export const TEXTURE_SCALE = 4;

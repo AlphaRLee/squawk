@@ -1,6 +1,6 @@
 import { Component } from 'ape-ecs';
 
-class CPosition extends Component {
+export class CPosition extends Component {
   x: number;
   y: number;
 
@@ -9,5 +9,3 @@ class CPosition extends Component {
     y: 0,
   };
 }
-
-export default CPosition;

@@ -1,7 +1,7 @@
 import { Component } from 'ape-ecs';
 import { Container, Text } from 'pixi.js';
 
-class CTextBubble extends Component {
+export class CTextBubble extends Component {
   container: Container;
   text: Text;
   message: string;
@@ -12,5 +12,3 @@ class CTextBubble extends Component {
     message: undefined as string,
   };
 }
-
-export default CTextBubble;

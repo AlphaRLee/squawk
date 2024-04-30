@@ -10,18 +10,30 @@ import {
   Texture,
   Graphics,
 } from 'pixi.js';
-import { CPosition, CTextBubble, Tags } from '../components';
+import {
+  CVelocity,
+  VelocityDurationType,
+  CPosition,
+  CTextBubble,
+  CType,
+  Tags,
+  CPositionAt,
+  PositionAnchor,
+} from '../components';
 import Game from '../Game';
 import loadTextBubbleTextures, {
   TextBubbleTextures,
 } from '../../utils/loadTextBubbleTextures';
-import { textureScale } from '../../utils/globals';
+import { TEXTURE_SCALE } from '../../utils/globals';
+import { distanceToFrames, timeToFrames } from '../../utils/animation';
+import { Vector } from '../../utils/vector';
 
 class SendTextSystem extends System {
   game: Game;
   app: Application<ICanvas>;
   newTextQuery: Query;
   existingTextQuery: Query;
+  posAtQuery: Query;
   posQuery: Query;
   textBubbleTextures: TextBubbleTextures;
 
@@ -32,11 +44,16 @@ class SendTextSystem extends System {
     this.app = this.game.app;
 
     this.newTextQuery = this.createQuery()
-      .fromAll(CTextBubble, Tags.New)
+      // .fromAll(CTextBubble, CPosition, Tags.new)
+      .fromAll(CTextBubble, Tags.new)
       .persist();
     this.existingTextQuery = this.createQuery()
       .fromAll(CTextBubble)
-      .not(Tags.New)
+      .not(Tags.new)
+      .persist();
+    this.posAtQuery = this.createQuery()
+      .fromAll(CTextBubble, CPositionAt)
+      .not(CPosition)
       .persist();
     this.posQuery = this.createQuery()
       .fromAll(CTextBubble, CPosition)
@@ -48,24 +65,15 @@ class SendTextSystem extends System {
   update(tick: number) {
     this.newTextQuery.execute().forEach((entity: Entity) => {
       this.sendNewTextBubble(entity);
-      this.bumpExistingText(entity);
+      this.bumpExistingText(entity, this.existingTextQuery.execute());
     });
 
+    this.posAtQuery?.execute()?.forEach(this.setAnchoredPosition);
     this.posQuery?.execute()?.forEach(this.setPosition);
   }
 
   sendNewTextBubble = (entity: Entity): void => {
     const cTextBubble: CTextBubble = entity.getOne(CTextBubble);
-
-    // FIXME: Dupe code
-    // const style = new TextStyle({
-    //   fontFamily: ['Minecraft', 'Arial'],
-    //   fontSize: 16,
-    //   wordWrap: true,
-    //   wordWrapWidth: Math.min(this.game.size.width, 200),
-    // });
-    // const text = new Text(cTextBubble.message, style);
-    // text.anchor.set(0.5);
 
     const { container, text } = this.createTextBubbleContainer(
       cTextBubble.message
@@ -75,7 +83,7 @@ class SendTextSystem extends System {
     cTextBubble.text = text;
 
     cTextBubble.update();
-    entity.removeTag(Tags.New);
+    entity.removeTag(Tags.new);
   };
 
   createTextBubbleContainer = (
@@ -87,7 +95,7 @@ class SendTextSystem extends System {
       wordWrap: true,
       wordWrapWidth: Math.min(this.game.size.width, 200),
     });
-    const scale = textureScale;
+    const scale = TEXTURE_SCALE;
     const textureSize = 3;
     const textPadding = textureSize * scale;
 
@@ -131,8 +139,6 @@ class SendTextSystem extends System {
     sides.top.position = { x: textPadding, y: 0 };
     sides.bottom.position = { x: textPadding, y: text.height + textPadding };
 
-    console.log('sides.left', sides.left.width, sides.left.height);
-
     const corners = Object.entries(this.textBubbleTextures.corner).reduce(
       (prev, [k, v]: [string, Texture]) => {
         const sprite = new Sprite(v);
@@ -157,11 +163,70 @@ class SendTextSystem extends System {
     text.position = { x: textPadding, y: textPadding };
     container.addChild(text);
 
+    container.interactive = true;
+
     return { container, text };
   };
 
-  bumpExistingText = (entity: Entity): void => {
-    const newCText: CTextBubble = entity.getOne(CTextBubble);
+  bumpExistingText = (
+    newEntity: Entity,
+    existingEntities: Set<Entity>
+  ): void => {
+    const newCTextBubble: CTextBubble = newEntity.getOne(CTextBubble);
+    const newContainer: Container = newCTextBubble.container;
+    existingEntities.forEach((entity) => {
+      const vy = -4;
+
+      entity.addComponent({
+        type: CType.CVelocity,
+        velocity: {
+          x: 0,
+          y: vy,
+        },
+        durationType: VelocityDurationType.TIMED,
+        duration: distanceToFrames(newContainer.height, vy),
+      });
+    });
+  };
+
+  /**
+   * Replace the CPositionAt with CPosition. Should happen before drawing the CPosition
+   * @param entity
+   * @returns
+   */
+  setAnchoredPosition = (entity: Entity): void => {
+    const cTextBubble: CTextBubble = entity.getOne(CTextBubble);
+    const { container } = cTextBubble;
+    if (!container) return;
+
+    const cPosAt = entity.getOne(CPositionAt);
+    const topLeftPos: Vector = { x: 0, y: 0 };
+
+    switch (cPosAt.anchor) {
+      case PositionAnchor.TOP_LEFT:
+        topLeftPos.x = cPosAt.x;
+        topLeftPos.y = cPosAt.y;
+        break;
+      case PositionAnchor.TOP_RIGHT:
+        topLeftPos.x = cPosAt.x - container.width;
+        topLeftPos.y = cPosAt.y;
+        break;
+      case PositionAnchor.BOTTOM_LEFT:
+        topLeftPos.x = cPosAt.x;
+        topLeftPos.y = cPosAt.y - container.height;
+        break;
+      case PositionAnchor.BOTTOM_RIGHT:
+        topLeftPos.x = cPosAt.x - container.width;
+        topLeftPos.y = cPosAt.y - container.height;
+        break;
+    }
+
+    entity.removeComponent(cPosAt);
+    entity.addComponent({
+      type: CType.CPosition,
+      key: 'cPosition',
+      ...topLeftPos,
+    });
   };
 
   setPosition = (entity: Entity): void => {

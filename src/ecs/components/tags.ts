@@ -1,5 +1,6 @@
-enum Tags {
-  'New' = 'New',
+export enum Tags {
+  'new' = 'new',
+  'interactiveSprite' = 'interactiveSprite',
 }
 
-export default Tags;
+// export default Tags;
