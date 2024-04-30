@@ -6,7 +6,7 @@ export class CMomentum extends Component {
   vector: Vector;
 
   static properties = {
-    magnitude: undefined as number,
+    magnitude: 0,
     vector: {
       x: 0,
       y: 0,

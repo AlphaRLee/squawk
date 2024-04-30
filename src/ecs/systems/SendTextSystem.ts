@@ -44,7 +44,6 @@ class SendTextSystem extends System {
     this.app = this.game.app;
 
     this.newTextQuery = this.createQuery()
-      // .fromAll(CTextBubble, CPosition, Tags.new)
       .fromAll(CTextBubble, Tags.new)
       .persist();
     this.existingTextQuery = this.createQuery()
@@ -191,6 +190,7 @@ class SendTextSystem extends System {
 
   /**
    * Replace the CPositionAt with CPosition. Should happen before drawing the CPosition
+   * TODO: Merge with SpriteSystem code
    * @param entity
    * @returns
    */

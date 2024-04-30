@@ -1,28 +1,32 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, ChangeEvent } from 'react';
+import { MessageData } from '../../types';
 
 const MessageInput = ({
   onSubmit,
 }: {
-  onSubmit: (message: string) => void;
+  onSubmit: (message: MessageData) => void;
 }) => {
-  const [text, setText] = useState<string>('');
+  const [message, setMessage] = useState<MessageData>({
+    text: '',
+    timestamp: Date.now(),
+  });
 
   const onKeyDown = (event) => {
-    if (event.key === 'Enter' && text !== '') {
-      onSubmit(text);
-      setText('');
+    if (event.key === 'Enter' && message.text !== '') {
+      onSubmit(message);
+      setMessage({ text: '', timestamp: Date.now() });
     }
   };
 
-  const onChange = (event) => {
-    setText(event.target.value);
+  const onChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setMessage({ text: event.target.value, timestamp: Date.now() });
   };
 
   return (
     <div>
       <input
         type="text"
-        value={text}
+        value={message.text}
         enterKeyHint="send"
         onChange={onChange}
         onKeyDown={onKeyDown}

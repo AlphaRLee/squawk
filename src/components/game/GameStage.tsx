@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { Stage, Container, useApp, useTick } from '@pixi/react';
 import Game from '../../ecs/Game';
+import { MessageData } from '../../types';
 
 const maxMessageHistory = 30;
 const smSize = 475;
@@ -11,7 +12,7 @@ const GameCore = ({
   lastMessage,
   size,
 }: {
-  lastMessage: string;
+  lastMessage: MessageData;
   size: { width: number; height: number };
 }) => {
   const app = useApp();
@@ -27,11 +28,13 @@ const GameCore = ({
   return <Container x={150} y={150}></Container>;
 };
 
-export const GameStage = ({ lastMessage }: { lastMessage: string }) => {
+export const GameStage = ({ lastMessage }: { lastMessage: MessageData }) => {
   const [messageLog, setMessageLog] = useState<string[]>([]); // FIXME: is log history useful here?
 
   useEffect(() => {
-    let newMessageLog = [...messageLog, lastMessage];
+    if (!lastMessage?.text) return;
+
+    let newMessageLog = [...messageLog, lastMessage.text];
     if (newMessageLog.length > maxMessageHistory) newMessageLog.shift();
 
     setMessageLog(newMessageLog);

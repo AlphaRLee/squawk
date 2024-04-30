@@ -1,10 +1,9 @@
 import { Component } from 'ape-ecs';
-import { Vector } from '../../utils/vector';
 
 export class CMass extends Component {
   mass: number;
 
   static properties = {
-    mass: undefined as number,
+    mass: 1, // Default to 1 because you're probably gonna make a divide by 0 error somewhere if you don't
   };
 }

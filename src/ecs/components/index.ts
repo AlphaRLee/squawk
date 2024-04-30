@@ -8,6 +8,7 @@ export * from './CVelocity';
 export * from './CTextBubble';
 export * from './CMass';
 export * from './CMomentum';
+export * from './CCollidable';
 
 export enum CType {
   'CGame' = 'CGame',
@@ -18,18 +19,7 @@ export enum CType {
   'CVelocity' = 'CVelocity',
   'CMass' = 'CMass',
   'CMomentum' = 'CMomentum',
+  'CCollidable' = 'CCollidable',
   'CText' = 'CText',
   'CTextBubble' = 'CTextBubble',
 }
-
-// export {
-//   Tags,
-//   CGame,
-//   CSprite,
-//   CAnimatedSprite,
-//   CPosition,
-//   CVelocity,
-//   CMass,
-//   CMomentum,
-//   CTextBubble,
-// };
