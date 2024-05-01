@@ -4,6 +4,7 @@ export * from './CSprite';
 export * from './CAnimatedSprite';
 export * from './CPosition';
 export * from './CPositionAt';
+export * from './CSize';
 export * from './CVelocity';
 export * from './CTextBubble';
 export * from './CMass';
@@ -16,6 +17,7 @@ export enum CType {
   'CAnimatedSprite' = 'CAnimatedSprite',
   'CPosition' = 'CPosition',
   'CPositionAt' = 'CPositionAt',
+  'CSize' = 'CSize',
   'CVelocity' = 'CVelocity',
   'CMass' = 'CMass',
   'CMomentum' = 'CMomentum',

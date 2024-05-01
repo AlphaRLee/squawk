@@ -1,10 +1,10 @@
-import SpriteSystem from './SpriteSystem';
-import SendTextSystem from './SendTextSystem';
-import PhysicsSystem from './PhysicsSystem';
+export * from './SpriteSystem';
+export * from './PositionSystem';
+export * from './SendTextSystem';
+export * from './VelocitySystem';
+export * from './CollisionSystem';
 
-enum RunType {
+export enum RunType {
   'tick' = 'tick',
   'trigger' = 'trigger',
 }
-
-export { RunType, SpriteSystem, SendTextSystem, PhysicsSystem };

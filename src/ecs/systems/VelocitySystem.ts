@@ -5,7 +5,7 @@ import Game from '../Game';
 import { Vector } from '../../utils/vector';
 import { VelocityDurationType } from '../components/CVelocity';
 
-class PhysicsSystem extends System {
+export class VelocitySystem extends System {
   game: Game;
   app: Application<ICanvas>;
   hasVelocityQuery: Query;
@@ -69,5 +69,3 @@ class PhysicsSystem extends System {
     cPosition.update();
   };
 }
-
-export default PhysicsSystem;

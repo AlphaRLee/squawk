@@ -12,12 +12,15 @@ import {
   PositionAnchor,
   CPositionAt,
   CCollidable,
+  CSize,
 } from './components';
 import {
-  PhysicsSystem,
+  VelocitySystem,
   RunType,
   SendTextSystem,
   SpriteSystem,
+  CollisionSystem,
+  PositionSystem,
 } from './systems';
 import loadPetTextures from '../utils/loadPetTextures';
 import { MessageData } from '../types';
@@ -42,6 +45,7 @@ class Game {
     this.ecs.registerComponent(CAnimatedSprite);
     this.ecs.registerComponent(CPosition);
     this.ecs.registerComponent(CPositionAt);
+    this.ecs.registerComponent(CSize);
     this.ecs.registerComponent(CVelocity);
     this.ecs.registerComponent(CTextBubble);
     this.ecs.registerComponent(CCollidable);
@@ -50,8 +54,10 @@ class Game {
     this.createPetEntity();
 
     this.ecs.registerSystem(RunType.tick, SpriteSystem);
+    this.ecs.registerSystem(RunType.tick, PositionSystem);
     this.ecs.registerSystem(RunType.tick, SendTextSystem);
-    this.ecs.registerSystem(RunType.tick, PhysicsSystem);
+    this.ecs.registerSystem(RunType.tick, VelocitySystem);
+    this.ecs.registerSystem(RunType.tick, CollisionSystem);
 
     // TODO: Add event listeners here? Good for mouse press types
   }

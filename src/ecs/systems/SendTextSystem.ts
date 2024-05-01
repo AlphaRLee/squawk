@@ -28,12 +28,12 @@ import { TEXTURE_SCALE } from '../../utils/globals';
 import { distanceToFrames, timeToFrames } from '../../utils/animation';
 import { Vector } from '../../utils/vector';
 
-class SendTextSystem extends System {
+export class SendTextSystem extends System {
   game: Game;
   app: Application<ICanvas>;
   newTextQuery: Query;
   existingTextQuery: Query;
-  posAtQuery: Query;
+  // posAtQuery: Query;
   posQuery: Query;
   textBubbleTextures: TextBubbleTextures;
 
@@ -50,13 +50,10 @@ class SendTextSystem extends System {
       .fromAll(CTextBubble)
       .not(Tags.new)
       .persist();
-    this.posAtQuery = this.createQuery()
-      .fromAll(CTextBubble, CPositionAt)
-      .not(CPosition)
-      .persist();
-    this.posQuery = this.createQuery()
-      .fromAll(CTextBubble, CPosition)
-      .persist();
+    // this.posAtQuery = this.createQuery()
+    //   .fromAll(CTextBubble, CPositionAt)
+    //   .not(CPosition)
+    //   .persist();
 
     this.textBubbleTextures = loadTextBubbleTextures();
   }
@@ -66,9 +63,6 @@ class SendTextSystem extends System {
       this.sendNewTextBubble(entity);
       this.bumpExistingText(entity, this.existingTextQuery.execute());
     });
-
-    this.posAtQuery?.execute()?.forEach(this.setAnchoredPosition);
-    this.posQuery?.execute()?.forEach(this.setPosition);
   }
 
   sendNewTextBubble = (entity: Entity): void => {
@@ -80,8 +74,15 @@ class SendTextSystem extends System {
     this.app.stage.addChild(container);
     cTextBubble.container = container;
     cTextBubble.text = text;
-
     cTextBubble.update();
+
+    entity.addComponent({
+      type: CType.CSize,
+      key: 'cSize',
+      width: container.width,
+      height: container.height,
+    });
+
     entity.removeTag(Tags.new);
   };
 
@@ -187,58 +188,4 @@ class SendTextSystem extends System {
       });
     });
   };
-
-  /**
-   * Replace the CPositionAt with CPosition. Should happen before drawing the CPosition
-   * TODO: Merge with SpriteSystem code
-   * @param entity
-   * @returns
-   */
-  setAnchoredPosition = (entity: Entity): void => {
-    const cTextBubble: CTextBubble = entity.getOne(CTextBubble);
-    const { container } = cTextBubble;
-    if (!container) return;
-
-    const cPosAt = entity.getOne(CPositionAt);
-    const topLeftPos: Vector = { x: 0, y: 0 };
-
-    switch (cPosAt.anchor) {
-      case PositionAnchor.TOP_LEFT:
-        topLeftPos.x = cPosAt.x;
-        topLeftPos.y = cPosAt.y;
-        break;
-      case PositionAnchor.TOP_RIGHT:
-        topLeftPos.x = cPosAt.x - container.width;
-        topLeftPos.y = cPosAt.y;
-        break;
-      case PositionAnchor.BOTTOM_LEFT:
-        topLeftPos.x = cPosAt.x;
-        topLeftPos.y = cPosAt.y - container.height;
-        break;
-      case PositionAnchor.BOTTOM_RIGHT:
-        topLeftPos.x = cPosAt.x - container.width;
-        topLeftPos.y = cPosAt.y - container.height;
-        break;
-    }
-
-    entity.removeComponent(cPosAt);
-    entity.addComponent({
-      type: CType.CPosition,
-      key: 'cPosition',
-      ...topLeftPos,
-    });
-  };
-
-  setPosition = (entity: Entity): void => {
-    const cTextBubble: CTextBubble = entity.getOne(CTextBubble);
-    const { container } = cTextBubble;
-    if (!container) return;
-
-    const cPos: CPosition = entity.getOne(CPosition);
-    container.x = cPos.x;
-    container.y = cPos.y;
-    cTextBubble.update();
-  };
 }
-
-export default SendTextSystem;
