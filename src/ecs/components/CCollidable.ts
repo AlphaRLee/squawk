@@ -1,9 +1,11 @@
 import { Component } from 'ape-ecs';
 
 export class CCollidable extends Component {
-  canCollide: boolean;
+  canBePushed: boolean;
+  restitution: number;
 
   static properties = {
-    canCollide: true,
+    canBePushed: false,
+    restitution: 1,
   };
 }

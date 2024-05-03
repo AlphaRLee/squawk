@@ -24,7 +24,6 @@ export class SpriteSystem extends System {
     this.game = this.world.getEntity('game').c.cGame.game;
     this.app = this.game.app;
 
-    // TODO: Check if persist is needed for all these
     this.spriteQuery = this.createQuery()
       .fromAll(CSprite, Tags.new)
       .not(CAnimatedSprite)
@@ -41,7 +40,7 @@ export class SpriteSystem extends System {
   }
 
   createSprite = (entity: Entity): void => {
-    const cSprite: CSprite = entity.getOne(CSprite);
+    const cSprite = entity.getOne(CSprite);
     const { texture } = cSprite;
     if (!texture) {
       console.warn(
@@ -69,8 +68,8 @@ export class SpriteSystem extends System {
   };
 
   createAnimatedSprite = (entity: Entity): void => {
-    const cSprite: CSprite = entity.getOne(CSprite);
-    const cAnimSprite: CAnimatedSprite = entity.getOne(CAnimatedSprite);
+    const cSprite = entity.getOne(CSprite);
+    const cAnimSprite = entity.getOne(CAnimatedSprite);
     const { textures } = cAnimSprite;
     if (!textures || !textures?.length) {
       console.warn(
@@ -85,6 +84,15 @@ export class SpriteSystem extends System {
 
     this.app.stage.addChild(sprite);
     cSprite.sprite = sprite;
+
+    entity.addComponent({
+      type: CType.CSize,
+      key: 'cSize',
+      width: sprite.width,
+      height: sprite.height,
+    });
+
+    cSprite.update();
     cAnimSprite.update();
 
     entity.removeTag(Tags.new);

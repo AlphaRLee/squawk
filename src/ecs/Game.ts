@@ -13,6 +13,7 @@ import {
   CPositionAt,
   CCollidable,
   CSize,
+  CMass,
 } from './components';
 import {
   VelocitySystem,
@@ -24,6 +25,7 @@ import {
 } from './systems';
 import loadPetTextures from '../utils/loadPetTextures';
 import { MessageData } from '../types';
+import { GravitySystem } from './systems/GravitySystem';
 
 class Game {
   app: Application<ICanvas>;
@@ -46,6 +48,7 @@ class Game {
     this.ecs.registerComponent(CPosition);
     this.ecs.registerComponent(CPositionAt);
     this.ecs.registerComponent(CSize);
+    this.ecs.registerComponent(CMass);
     this.ecs.registerComponent(CVelocity);
     this.ecs.registerComponent(CTextBubble);
     this.ecs.registerComponent(CCollidable);
@@ -53,11 +56,14 @@ class Game {
     this.createGameEntity();
     this.createPetEntity();
 
+    // this.createGroundEntity();
+
     this.ecs.registerSystem(RunType.tick, SpriteSystem);
     this.ecs.registerSystem(RunType.tick, PositionSystem);
     this.ecs.registerSystem(RunType.tick, SendTextSystem);
     this.ecs.registerSystem(RunType.tick, VelocitySystem);
     this.ecs.registerSystem(RunType.tick, CollisionSystem);
+    this.ecs.registerSystem(RunType.tick, GravitySystem);
 
     // TODO: Add event listeners here? Good for mouse press types
   }
@@ -108,16 +114,46 @@ class Game {
         {
           type: CType.CPosition,
           key: 'cPosition',
-          x: 100,
-          y: 150,
+          x: 300,
+          y: 400,
+        },
+        {
+          type: CType.CMass,
+          key: 'cMass',
+          mass: 1,
         },
         {
           type: CType.CCollidable,
           key: 'cCollidable',
-          canCollide: true,
+          canBePushed: true,
         },
       ],
-      tags: [Tags.new, Tags.interactiveSprite],
+      tags: [Tags.new, Tags.interactiveSprite, Tags.gravity],
+    });
+
+    // FIXME: Move this ground to a new function
+    this.ecs.createEntity({
+      id: 'ground',
+      components: [
+        {
+          type: CType.CSprite,
+          key: 'cSprite',
+          texture: petTextures.shocked[0],
+        },
+        {
+          type: CType.CPosition,
+          key: 'cPosition',
+          x: 280,
+          y: this.size.height - 50,
+        },
+        {
+          type: CType.CCollidable,
+          key: 'cCollidable',
+          canBePushed: false,
+          restitution: 1,
+        },
+      ],
+      tags: [Tags.new],
     });
   }
 
@@ -141,7 +177,8 @@ class Game {
         {
           type: CType.CCollidable,
           key: 'cCollidable',
-          canCollide: true,
+          canBePushed: false,
+          restitution: 0.1,
         },
       ],
       tags: [Tags.new],
