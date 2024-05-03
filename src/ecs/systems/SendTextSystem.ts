@@ -48,6 +48,7 @@ export class SendTextSystem extends System {
     this.newTextQuery.execute().forEach((entity: Entity) => {
       this.sendNewTextBubble(entity);
       this.bumpExistingText(entity, this.existingTextQuery.execute());
+      entity.removeTag(Tags.new);
     });
   }
 
@@ -68,8 +69,6 @@ export class SendTextSystem extends System {
       width: container.width,
       height: container.height,
     });
-
-    entity.removeTag(Tags.new);
   };
 
   createTextBubbleContainer = (

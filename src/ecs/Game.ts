@@ -59,8 +59,8 @@ class Game {
     // this.createGroundEntity();
 
     this.ecs.registerSystem(RunType.tick, SpriteSystem);
-    this.ecs.registerSystem(RunType.tick, PositionSystem);
     this.ecs.registerSystem(RunType.tick, SendTextSystem);
+    this.ecs.registerSystem(RunType.tick, PositionSystem);
     this.ecs.registerSystem(RunType.tick, VelocitySystem);
     this.ecs.registerSystem(RunType.tick, CollisionSystem);
     this.ecs.registerSystem(RunType.tick, GravitySystem);
