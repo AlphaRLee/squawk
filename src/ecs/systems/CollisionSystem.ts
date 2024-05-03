@@ -11,6 +11,12 @@ import { Application, ICanvas } from 'pixi.js';
 import Game from '../Game';
 import { Vector } from '../../utils/vector';
 
+// FIXME: Type belongs elsewhere
+type BumpBackEntityData = {
+  entity: Entity;
+  netVelocity: Vector;
+};
+
 export class CollisionSystem extends System {
   game: Game;
   app: Application<ICanvas>;
@@ -32,9 +38,9 @@ export class CollisionSystem extends System {
     collidedPairs.forEach(this.applyCollision);
   };
 
-  detectCollided = (): Set<[Entity, Entity]> => {
-    const collidedPairIds: Set<[string, string]> = new Set();
-    const collidedPairs: Set<[Entity, Entity]> = new Set();
+  detectCollided = (): [Entity, Entity][] => {
+    const collidedPairIds: Set<string> = new Set();
+    const collidedPairs: [Entity, Entity][] = [];
 
     // TODO: Implement a performant collision detection algorithm - this one is O(n^2)
 
@@ -48,9 +54,12 @@ export class CollisionSystem extends System {
 
     for (const recentlyMovedEntity of recentlyMovedEntities) {
       for (const collidableEntity of collidableEntities) {
+        const idKey = `${collidableEntity.id}|${recentlyMovedEntity.id}`;
         if (
           recentlyMovedEntity.id === collidableEntity.id ||
-          collidedPairIds.has([collidableEntity.id, recentlyMovedEntity.id])
+          (!recentlyMovedEntity.c.cCollidable.canBePushed &&
+            !collidableEntity.c.cCollidable.canBePushed) ||
+          collidedPairIds.has(idKey)
         ) {
           continue;
         }
@@ -64,8 +73,10 @@ export class CollisionSystem extends System {
           movedBoundingBox.top < collidableBoundingBox.bottom &&
           movedBoundingBox.bottom > collidableBoundingBox.top
         ) {
-          collidedPairIds.add([recentlyMovedEntity.id, collidableEntity.id]);
-          collidedPairs.add([recentlyMovedEntity, collidableEntity]);
+          collidedPairIds.add(
+            `${recentlyMovedEntity.id}|${collidableEntity.id}`
+          );
+          collidedPairs.push([recentlyMovedEntity, collidableEntity]);
         }
       }
     }
@@ -165,6 +176,11 @@ export class CollisionSystem extends System {
       this.replaceVelocity(entity1, newVelocity1);
       this.replaceVelocity(entity2, newVelocity2);
     } else if (cCollidable1.canBePushed && !cCollidable2.canBePushed) {
+      this.bumpPushableEntityBack(
+        { entity: entity1, netVelocity: velocity1 },
+        { entity: entity2, netVelocity: velocity2 }
+      );
+
       // Assume mass2 is near-infinite, so v2 drops by a tiny amount. Take inelastic collision formula to the limit
       // Unusual result: when v1 = 0 and cor = 1, then v1Result = 2*v2
       const newVelocity1 = {
@@ -174,6 +190,11 @@ export class CollisionSystem extends System {
       this.replaceVelocity(entity1, newVelocity1);
     } else if (!cCollidable1.canBePushed && cCollidable2.canBePushed) {
       // Opposite of above
+      this.bumpPushableEntityBack(
+        { entity: entity2, netVelocity: velocity2 },
+        { entity: entity1, netVelocity: velocity1 }
+      );
+
       const newVelocity2 = {
         x: cor * (velocity1.x - velocity2.x) + velocity1.x,
         y: cor * (velocity1.y - velocity2.y) + velocity1.y,
@@ -194,8 +215,67 @@ export class CollisionSystem extends System {
     );
   };
 
-  getSign = (n: number) => {
-    return n >= 0 ? 1 : -1;
+  bumpPushableEntityBack = (
+    pushableEntityData: BumpBackEntityData,
+    unpushableEntityData: BumpBackEntityData
+  ) => {
+    const { entity: pushableEntity, netVelocity: pVelocity } =
+      pushableEntityData;
+    const { entity: unpushableEntity, netVelocity: upVelocity } =
+      unpushableEntityData;
+
+    const pBB = this.getBoundingBox(pushableEntity);
+    const upBB = this.getBoundingBox(unpushableEntity);
+
+    const pVelocityInUnpushableRef: Vector = {
+      x: pVelocity.x - upVelocity.x,
+      y: pVelocity.y - upVelocity.y,
+    };
+
+    // Try 4 equations to bump back. Keep the one that gives a negative time and is closest to zero
+    // t = 0 is right now (after entities are intersecting one another). Negative time represents before they hit
+    const collisionScenarios = [
+      {
+        distance: upBB.right - pBB.left, // pushable left edge
+        pVInUnpushableRef: pVelocityInUnpushableRef.x,
+        pV: pVelocity.x,
+      },
+      {
+        distance: upBB.left - pBB.right, // pushable right edge
+        pVInUnpushableRef: pVelocityInUnpushableRef.x,
+        pV: pVelocity.x,
+      },
+      {
+        distance: upBB.bottom - pBB.top, // pushable top edge
+        pVInUnpushableRef: pVelocityInUnpushableRef.y,
+        pV: pVelocity.y,
+      },
+      {
+        distance: upBB.top - pBB.bottom, // pushable bottom edge
+        pVInUnpushableRef: pVelocityInUnpushableRef.y,
+        pV: pVelocity.y,
+      },
+    ].map((scenario) => ({
+      ...scenario,
+      timeInUnpushableRef: scenario.distance / scenario.pVInUnpushableRef,
+    }));
+    // .filter((scenario) => scenario.timeInUnpushableRef <= 0);
+
+    const collisionScenario = collisionScenarios.reduce(
+      (smallestScenario, scenario) =>
+        Math.abs(scenario.timeInUnpushableRef) <
+        Math.abs(smallestScenario.timeInUnpushableRef)
+          ? scenario
+          : smallestScenario
+    );
+
+    // Distance is constant, use that to go back to standard reference frame
+    const collisionTime = collisionScenario.distance / collisionScenario.pV;
+
+    const pCPos = pushableEntity.getOne(CPosition);
+    pCPos.x += pVelocity.x * collisionTime;
+    pCPos.y += pVelocity.y * collisionTime;
+    pCPos.update();
   };
 
   replaceVelocity = (entity: Entity, newVelocity: Vector) => {

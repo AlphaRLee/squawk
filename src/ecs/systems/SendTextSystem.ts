@@ -161,7 +161,7 @@ export class SendTextSystem extends System {
     const newCTextBubble: CTextBubble = newEntity.getOne(CTextBubble);
     const newContainer: Container = newCTextBubble.container;
     existingEntities.forEach((entity) => {
-      const vy = -4;
+      const vy = -8;
 
       entity.addComponent({
         type: CType.CVelocity,
