@@ -52,8 +52,7 @@ export class SpriteSystem extends System {
     }
 
     const sprite = new Sprite(texture);
-    sprite.anchor.set(0.5);
-    sprite.scale.set(2);
+    sprite.scale.set(TEXTURE_SCALE);
 
     this.app.stage.addChild(sprite);
     cSprite.sprite = sprite;
@@ -82,7 +81,6 @@ export class SpriteSystem extends System {
     }
 
     const sprite = new AnimatedSprite(cAnimSprite.textures);
-    sprite.anchor.set(0.5);
     sprite.scale.set(TEXTURE_SCALE);
 
     this.app.stage.addChild(sprite);

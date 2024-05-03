@@ -40,8 +40,16 @@ export class PositionSystem extends System {
 
   update(tick: number) {
     this.posAtQuery?.execute()?.forEach(this.setAnchoredPosition);
-    this.spritePosQuery?.execute()?.forEach(this.setSpritePosition);
-    this.textBubblePosQuery?.execute()?.forEach(this.setTextBubblePosition);
+    this.spritePosQuery
+      ?.execute({
+        updatedValues: tick - 1,
+      })
+      ?.forEach(this.setSpritePosition);
+    this.textBubblePosQuery
+      ?.execute({
+        updatedValues: tick - 1,
+      })
+      ?.forEach(this.setTextBubblePosition);
   }
 
   setAnchoredPosition = (entity: Entity): void => {
@@ -84,9 +92,11 @@ export class PositionSystem extends System {
     if (!sprite) return;
 
     const cPos: CPosition = entity.getOne(CPosition);
-    sprite.x = cPos.x;
-    sprite.y = cPos.y;
-    cSprite.update();
+    if (sprite.x !== cPos.x || sprite.y !== cPos.y) {
+      sprite.x = cPos.x;
+      sprite.y = cPos.y;
+      cSprite.update();
+    }
   };
 
   setTextBubblePosition = (entity: Entity): void => {
@@ -95,8 +105,10 @@ export class PositionSystem extends System {
     if (!container) return;
 
     const cPos: CPosition = entity.getOne(CPosition);
-    container.x = cPos.x;
-    container.y = cPos.y;
-    cTextBubble.update();
+    if (container.x !== cPos.x || container.y !== cPos.y) {
+      container.x = cPos.x;
+      container.y = cPos.y;
+      cTextBubble.update();
+    }
   };
 }

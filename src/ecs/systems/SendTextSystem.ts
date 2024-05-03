@@ -10,23 +10,13 @@ import {
   Texture,
   Graphics,
 } from 'pixi.js';
-import {
-  CVelocity,
-  VelocityDurationType,
-  CPosition,
-  CTextBubble,
-  CType,
-  Tags,
-  CPositionAt,
-  PositionAnchor,
-} from '../components';
+import { VelocityDurationType, CTextBubble, CType, Tags } from '../components';
 import Game from '../Game';
 import loadTextBubbleTextures, {
   TextBubbleTextures,
 } from '../../utils/loadTextBubbleTextures';
 import { TEXTURE_SCALE } from '../../utils/globals';
-import { distanceToFrames, timeToFrames } from '../../utils/animation';
-import { Vector } from '../../utils/vector';
+import { distanceToFrames } from '../../utils/animation';
 
 export class SendTextSystem extends System {
   game: Game;
@@ -50,10 +40,6 @@ export class SendTextSystem extends System {
       .fromAll(CTextBubble)
       .not(Tags.new)
       .persist();
-    // this.posAtQuery = this.createQuery()
-    //   .fromAll(CTextBubble, CPositionAt)
-    //   .not(CPosition)
-    //   .persist();
 
     this.textBubbleTextures = loadTextBubbleTextures();
   }
