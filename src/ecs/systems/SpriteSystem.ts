@@ -9,13 +9,14 @@ import {
 } from '../components';
 import Game from '../Game';
 import { TEXTURE_SCALE } from '../../utils/globals';
+import { AnimationSystem } from './AnimationSystem';
+import { petAnimations } from '../animations/pet';
 
 export class SpriteSystem extends System {
   game: Game;
   app: Application<ICanvas>;
   spriteQuery: Query;
   animatedSpriteQuery: Query;
-  posAtQuery: Query;
 
   constructor(world: World, ...args: any[]) {
     super(world, ...args);
@@ -93,8 +94,10 @@ export class SpriteSystem extends System {
     });
 
     cSprite.update();
-    cAnimSprite.update();
-
+    AnimationSystem.playAnimation(
+      cSprite,
+      petAnimations[cAnimSprite.activityName]
+    );
     entity.removeTag(Tags.new);
   };
 }

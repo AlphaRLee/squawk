@@ -14,6 +14,7 @@ import {
   CCollidable,
   CSize,
   CMass,
+  CActivity,
 } from './components';
 import {
   VelocitySystem,
@@ -24,8 +25,9 @@ import {
   PositionSystem,
 } from './systems';
 import loadPetTextures from '../utils/loadPetTextures';
-import { MessageData } from '../types';
+import { MessageData, PetActivity } from '../types';
 import { GravitySystem } from './systems/GravitySystem';
+import { AnimationSystem } from './systems/AnimationSystem';
 
 class Game {
   app: Application<ICanvas>;
@@ -33,6 +35,7 @@ class Game {
   ecs: World;
   dt: number;
 
+  // FIXME: React rendering problems, I'm somehow triggering this twice
   constructor(options: {
     app: Application<ICanvas>;
     size: { width: number; height: number };
@@ -52,6 +55,7 @@ class Game {
     this.ecs.registerComponent(CVelocity);
     this.ecs.registerComponent(CTextBubble);
     this.ecs.registerComponent(CCollidable);
+    this.ecs.registerComponent(CActivity);
 
     this.createGameEntity();
     this.createPetEntity();
@@ -60,6 +64,7 @@ class Game {
 
     this.ecs.registerSystem(RunType.tick, SpriteSystem);
     this.ecs.registerSystem(RunType.tick, SendTextSystem);
+    this.ecs.registerSystem(RunType.tick, AnimationSystem);
     this.ecs.registerSystem(RunType.tick, PositionSystem);
     this.ecs.registerSystem(RunType.tick, VelocitySystem);
     this.ecs.registerSystem(RunType.tick, CollisionSystem);
@@ -108,6 +113,7 @@ class Game {
         {
           type: CType.CAnimatedSprite,
           key: 'cAnimatedSprite',
+          activityName: PetActivity.IDLE,
           textures: petTextures.idle,
           textureStates: petTextures,
         },
@@ -126,6 +132,11 @@ class Game {
           type: CType.CCollidable,
           key: 'cCollidable',
           canBePushed: true,
+        },
+        {
+          type: CType.CActivity,
+          key: 'cActivity',
+          name: PetActivity.IDLE,
         },
       ],
       tags: [Tags.new, Tags.interactiveSprite, Tags.gravity],

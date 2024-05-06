@@ -1,7 +1,7 @@
 import { Texture, BaseTexture, Rectangle, SCALE_MODES } from 'pixi.js';
 const petSpriteSheetImg = '/assets/BirdSprite.png';
 
-export type PetAnimations = {
+export type PetAnimationTextures = {
   idle: Texture[];
   flying: Texture[];
   pecking: Texture[];
@@ -16,7 +16,11 @@ export type PetAnimations = {
 const w = 16;
 const h = 16;
 
-const loadPetTextures = () => {
+let petAnimationTextures: PetAnimationTextures | undefined;
+
+const loadPetTextures = (): PetAnimationTextures => {
+  if (petAnimationTextures) return petAnimationTextures;
+
   const baseTexture = BaseTexture.from(petSpriteSheetImg);
   baseTexture.scaleMode = SCALE_MODES.NEAREST;
 
@@ -25,7 +29,7 @@ const loadPetTextures = () => {
 
   const mainPose = textureAt(0, 0);
 
-  const petAnimations: PetAnimations = {
+  petAnimationTextures = {
     idle: [mainPose, textureAt(1, 0)],
     flying: texturesAt(0, 1, 7),
     pecking: texturesAt(0, 2, 2),
@@ -37,7 +41,7 @@ const loadPetTextures = () => {
     sweating: texturesAt(0, 8, 2),
   };
 
-  return petAnimations;
+  return petAnimationTextures;
 };
 
 const buildTexture =
@@ -47,6 +51,7 @@ const buildTexture =
       baseTexture,
       new Rectangle(x * width, y * height, width, height)
     );
+
 const buildTextures =
   (baseTexture: BaseTexture, width: number, height: number) =>
   (

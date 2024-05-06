@@ -23,13 +23,17 @@ export type TextBubbleTextures = {
 const w = 3;
 const h = 3;
 
-const loadTextBubbleTextures = () => {
+let textBubbleTextures: TextBubbleTextures | undefined;
+
+const loadTextBubbleTextures = (): TextBubbleTextures => {
+  if (textBubbleTextures) return textBubbleTextures;
+
   const baseTexture = BaseTexture.from(textBubbleSpriteSheetImg);
   baseTexture.scaleMode = SCALE_MODES.NEAREST;
 
   const textureAt = buildTexture(baseTexture, w, h);
 
-  const textures: TextBubbleTextures = {
+  textBubbleTextures = {
     side: {
       left: textureAt(4, 0),
       right: textureAt(5, 0),
@@ -48,7 +52,7 @@ const loadTextBubbleTextures = () => {
     },
   };
 
-  return textures;
+  return textBubbleTextures;
 };
 
 const buildTexture =
