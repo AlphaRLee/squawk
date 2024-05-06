@@ -10,7 +10,13 @@ import {
   Texture,
   Graphics,
 } from 'pixi.js';
-import { VelocityDurationType, CTextBubble, CType, Tags } from '../components';
+import {
+  VelocityDurationType,
+  CTextBubble,
+  CType,
+  Tags,
+  CSpriteContainer,
+} from '../components';
 import Game from '../Game';
 import loadTextBubbleTextures, {
   TextBubbleTextures,
@@ -23,7 +29,6 @@ export class SendTextSystem extends System {
   app: Application<ICanvas>;
   newTextQuery: Query;
   existingTextQuery: Query;
-  // posAtQuery: Query;
   posQuery: Query;
   textBubbleTextures: TextBubbleTextures;
 
@@ -37,7 +42,7 @@ export class SendTextSystem extends System {
       .fromAll(CTextBubble, Tags.new)
       .persist();
     this.existingTextQuery = this.createQuery()
-      .fromAll(CTextBubble)
+      .fromAll(CTextBubble, CSpriteContainer)
       .not(Tags.new)
       .persist();
 
@@ -59,7 +64,6 @@ export class SendTextSystem extends System {
       cTextBubble.message
     );
     this.app.stage.addChild(container);
-    cTextBubble.container = container;
     cTextBubble.text = text;
     cTextBubble.update();
 
@@ -68,6 +72,10 @@ export class SendTextSystem extends System {
       key: 'cSize',
       width: container.width,
       height: container.height,
+    });
+    entity.addComponent({
+      type: CType.CSpriteContainer,
+      container,
     });
   };
 
@@ -157,8 +165,8 @@ export class SendTextSystem extends System {
     newEntity: Entity,
     existingEntities: Set<Entity>
   ): void => {
-    const newCTextBubble: CTextBubble = newEntity.getOne(CTextBubble);
-    const newContainer: Container = newCTextBubble.container;
+    const newCSpriteContainer = newEntity.getOne(CSpriteContainer);
+    const newContainer: Container = newCSpriteContainer.container;
     existingEntities.forEach((entity) => {
       const vy = -8;
 

@@ -15,6 +15,7 @@ import {
   CSize,
   CMass,
   CActivity,
+  CSpriteContainer,
 } from './components';
 import {
   VelocitySystem,
@@ -23,11 +24,14 @@ import {
   SpriteSystem,
   CollisionSystem,
   PositionSystem,
+  BackgroundSceneSystem,
 } from './systems';
 import loadPetTextures from '../utils/loadPetTextures';
 import { MessageData, PetActivity } from '../types';
 import { GravitySystem } from './systems/GravitySystem';
 import { AnimationSystem } from './systems/AnimationSystem';
+import { PetActivitySystem } from './systems/pet/PetActivitySystem';
+import loadGroundTextures from '../utils/loadGroundTextures';
 
 class Game {
   app: Application<ICanvas>;
@@ -47,6 +51,7 @@ class Game {
     this.ecs.registerTags(...Object.keys(Tags));
     this.ecs.registerComponent(CGame, 1);
     this.ecs.registerComponent(CSprite);
+    this.ecs.registerComponent(CSpriteContainer);
     this.ecs.registerComponent(CAnimatedSprite);
     this.ecs.registerComponent(CPosition);
     this.ecs.registerComponent(CPositionAt);
@@ -59,16 +64,17 @@ class Game {
 
     this.createGameEntity();
     this.createPetEntity();
-
-    // this.createGroundEntity();
+    this.createGroundEntity();
 
     this.ecs.registerSystem(RunType.tick, SpriteSystem);
+    this.ecs.registerSystem(RunType.tick, BackgroundSceneSystem);
     this.ecs.registerSystem(RunType.tick, SendTextSystem);
     this.ecs.registerSystem(RunType.tick, AnimationSystem);
     this.ecs.registerSystem(RunType.tick, PositionSystem);
     this.ecs.registerSystem(RunType.tick, VelocitySystem);
     this.ecs.registerSystem(RunType.tick, CollisionSystem);
     this.ecs.registerSystem(RunType.tick, GravitySystem);
+    this.ecs.registerSystem(RunType.tick, PetActivitySystem);
 
     // TODO: Add event listeners here? Good for mouse press types
   }
@@ -141,21 +147,23 @@ class Game {
       ],
       tags: [Tags.new, Tags.interactiveSprite, Tags.gravity],
     });
+  }
 
-    // FIXME: Move this ground to a new function
+  createGroundEntity(): void {
     this.ecs.createEntity({
       id: 'ground',
       components: [
         {
-          type: CType.CSprite,
-          key: 'cSprite',
-          texture: petTextures.shocked[0],
-        },
-        {
           type: CType.CPosition,
           key: 'cPosition',
-          x: 280,
-          y: this.size.height - 200,
+          x: 0,
+          y: this.size.height - 100,
+        },
+        {
+          type: CType.CSize,
+          key: 'cSize',
+          width: this.size.width,
+          height: 128,
         },
         {
           type: CType.CCollidable,
@@ -164,7 +172,7 @@ class Game {
           restitution: 0.4,
         },
       ],
-      tags: [Tags.new],
+      tags: [Tags.ground, Tags.new],
     });
   }
 

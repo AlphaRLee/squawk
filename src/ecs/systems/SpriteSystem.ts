@@ -4,6 +4,7 @@ import {
   CAnimatedSprite,
   CPosition,
   CSprite,
+  CSpriteContainer,
   CType,
   Tags,
 } from '../components';
@@ -16,6 +17,7 @@ export class SpriteSystem extends System {
   game: Game;
   app: Application<ICanvas>;
   spriteQuery: Query;
+  containerQuery: Query;
   animatedSpriteQuery: Query;
 
   constructor(world: World, ...args: any[]) {
@@ -36,8 +38,8 @@ export class SpriteSystem extends System {
 
   update(tick: number) {
     // FIXME: Why is this.spriteQuery and all other things set in init() always undefined? Fall back to this.queries?
-    this.spriteQuery?.execute()?.forEach(this.createSprite);
-    this.animatedSpriteQuery?.execute()?.forEach(this.createAnimatedSprite);
+    this.spriteQuery?.execute().forEach(this.createSprite);
+    this.animatedSpriteQuery?.execute().forEach(this.createAnimatedSprite);
   }
 
   createSprite = (entity: Entity): void => {

@@ -2,18 +2,12 @@ import { System, World } from 'ape-ecs';
 import { CActivity, CAnimatedSprite, CSprite } from '../components';
 import { AnimatedSprite, Application, ICanvas, Sprite } from 'pixi.js';
 import Game from '../Game';
-import { Animation, PetActivity } from '../../types';
-import {
-  createFlyingAnimation,
-  createIdleAnimation,
-  createShockedAnimation,
-  petAnimations,
-} from '../animations/pet';
+import { Animation } from '../../types';
+import { petAnimations } from '../animations/pet';
 
 export class AnimationSystem extends System {
   game: Game;
   app: Application<ICanvas>;
-  newEntityAnimationQuery;
 
   constructor(world: World, ...args: any[]) {
     super(world, ...args);

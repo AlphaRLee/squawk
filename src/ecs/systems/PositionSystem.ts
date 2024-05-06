@@ -4,6 +4,7 @@ import {
   CPositionAt,
   CSize,
   CSprite,
+  CSpriteContainer,
   CTextBubble,
   CType,
   PositionAnchor,
@@ -17,7 +18,7 @@ export class PositionSystem extends System {
   app: Application<ICanvas>;
   posAtQuery: Query;
   spritePosQuery: Query;
-  textBubblePosQuery: Query;
+  spriteContainerPosQuery: Query;
 
   constructor(world: World, ...args: any[]) {
     super(world, ...args);
@@ -33,8 +34,8 @@ export class PositionSystem extends System {
       .fromAll(CSprite, CPosition)
       .persist();
     // TODO: Create a CSpriteContainer component and use instead of CTextBubble
-    this.textBubblePosQuery = this.createQuery()
-      .fromAll(CTextBubble, CPosition)
+    this.spriteContainerPosQuery = this.createQuery()
+      .fromAll(CSpriteContainer, CPosition)
       .persist();
   }
 
@@ -45,11 +46,11 @@ export class PositionSystem extends System {
         updatedValues: tick - 1,
       })
       ?.forEach(this.setSpritePosition);
-    this.textBubblePosQuery
+    this.spriteContainerPosQuery
       ?.execute({
         updatedValues: tick - 1,
       })
-      ?.forEach(this.setTextBubblePosition);
+      ?.forEach(this.setSpriteContainerPosition);
   }
 
   setAnchoredPosition = (entity: Entity): void => {
@@ -99,16 +100,16 @@ export class PositionSystem extends System {
     }
   };
 
-  setTextBubblePosition = (entity: Entity): void => {
-    const cTextBubble: CTextBubble = entity.getOne(CTextBubble);
-    const { container } = cTextBubble;
+  setSpriteContainerPosition = (entity: Entity): void => {
+    const cSpriteContainer = entity.getOne(CSpriteContainer);
+    const { container } = cSpriteContainer;
     if (!container) return;
 
     const cPos: CPosition = entity.getOne(CPosition);
     if (container.x !== cPos.x || container.y !== cPos.y) {
       container.x = cPos.x;
       container.y = cPos.y;
-      cTextBubble.update();
+      cSpriteContainer.update();
     }
   };
 }

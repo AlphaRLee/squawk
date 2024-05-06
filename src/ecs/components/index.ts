@@ -1,6 +1,7 @@
 export * from './tags';
 export * from './CGame';
 export * from './CSprite';
+export * from './CSpriteContainer';
 export * from './CAnimatedSprite';
 export * from './CAnimation';
 export * from './CPosition';
@@ -16,6 +17,7 @@ export * from './CActivity';
 export enum CType {
   'CGame' = 'CGame',
   'CSprite' = 'CSprite',
+  'CSpriteContainer' = 'CSpriteContainer',
   'CAnimatedSprite' = 'CAnimatedSprite',
   'CAnimatation' = 'CAnimatation',
   'CPosition' = 'CPosition',

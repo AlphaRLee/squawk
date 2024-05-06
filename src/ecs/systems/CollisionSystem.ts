@@ -10,6 +10,7 @@ import {
 import { Application, ICanvas } from 'pixi.js';
 import Game from '../Game';
 import { Vector } from '../../utils/vector';
+import { getNetVelocity } from '../../utils/velocity';
 
 // FIXME: Type belongs elsewhere
 type BumpBackEntityData = {
@@ -117,8 +118,8 @@ export class CollisionSystem extends System {
       return;
     }
 
-    const velocity1 = this.getNetVelocity(entity1);
-    const velocity2 = this.getNetVelocity(entity2);
+    const velocity1 = getNetVelocity(entity1);
+    const velocity2 = getNetVelocity(entity2);
 
     const cMass1: CMass | undefined = entity1.getOne(CMass);
     const cMass2: CMass | undefined = entity2.getOne(CMass);
@@ -201,18 +202,6 @@ export class CollisionSystem extends System {
       };
       this.replaceVelocity(entity2, newVelocity2);
     }
-  };
-
-  getNetVelocity = (entity: Entity): Vector => {
-    const cVelocities = entity.getComponents(CVelocity);
-    return [...cVelocities].reduce(
-      (netVelocity: Vector, cVelocity) => {
-        netVelocity.x += cVelocity.velocity.x;
-        netVelocity.y += cVelocity.velocity.y;
-        return netVelocity;
-      },
-      { x: 0, y: 0 } as Vector
-    );
   };
 
   bumpPushableEntityBack = (
