@@ -71,7 +71,10 @@ export class PetActivitySystem extends System {
       return;
     }
 
-    if (nextActivity.priority >= currentActivity.priority) {
+    if (
+      nextActivity.priority >= currentActivity.priority &&
+      nextActivity.name !== currentActivity.name
+    ) {
       PetActivitySystem.addPlannedActivity(entity, currentActivity);
       this.updateActivity(entity, nextActivityIndex);
     }

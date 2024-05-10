@@ -3,6 +3,7 @@ const petSpriteSheetImg = '/assets/BirdSprite.png';
 
 export type PetAnimationTextures = {
   idle: Texture[];
+  blinking: Texture[];
   flying: Texture[];
   pecking: Texture[];
   turningToFront: Texture[];
@@ -31,6 +32,7 @@ const loadPetTextures = (): PetAnimationTextures => {
 
   petAnimationTextures = {
     idle: [mainPose, textureAt(1, 0)],
+    blinking: [textureAt(2, 0)],
     flying: texturesAt(0, 1, 7),
     pecking: texturesAt(0, 2, 2),
     turningToFront: texturesAt(0, 3, 2),

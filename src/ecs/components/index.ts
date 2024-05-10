@@ -12,6 +12,7 @@ export * from './CTextBubble';
 export * from './CMass';
 export * from './CMomentum';
 export * from './CCollidable';
+export * from './CCollisionEventQueue';
 export * from './CActivity';
 export * from './CPlannedActivities';
 
@@ -28,7 +29,7 @@ export enum CType {
   'CVelocity' = 'CVelocity',
   'CMomentum' = 'CMomentum',
   'CCollidable' = 'CCollidable',
-  'CText' = 'CText',
+  'CCollisionEventQueue' = 'CCollisionEventQueue',
   'CTextBubble' = 'CTextBubble',
   'CActivity' = 'CActivity',
   'CPlannedActivities' = 'CPlannedActivities',

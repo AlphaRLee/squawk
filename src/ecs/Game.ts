@@ -12,6 +12,7 @@ import {
   PositionAnchor,
   CPositionAt,
   CCollidable,
+  CCollisionEventQueue,
   CSize,
   CMass,
   CActivity,
@@ -33,7 +34,7 @@ import { MessageData, PetActivity } from '../types';
 import { GravitySystem } from './systems/GravitySystem';
 import { AnimationSystem } from './systems/AnimationSystem';
 import { PetActivitySystem } from './systems/pet/PetActivitySystem';
-import loadGroundTextures from '../utils/loadGroundTextures';
+import { Vector } from '../utils';
 
 class Game {
   app: Application<ICanvas>;
@@ -64,11 +65,13 @@ class Game {
     this.ecs.registerComponent(CVelocity);
     this.ecs.registerComponent(CTextBubble);
     this.ecs.registerComponent(CCollidable);
+    this.ecs.registerComponent(CCollisionEventQueue);
     this.ecs.registerComponent(CActivity);
     this.ecs.registerComponent(CPlannedActivities);
 
     this.createGameEntity();
-    this.createPetEntity();
+    this.createPetEntity('pet', { x: 300, y: 200 });
+    this.createPetEntity('pet2', { x: 100, y: 300 });
     this.createGroundEntity();
 
     this.ecs.registerSystem(RunType.tick, SpriteSystem);
@@ -113,11 +116,11 @@ class Game {
     });
   }
 
-  createPetEntity(): void {
+  createPetEntity(id: string, position: Vector): void {
     const petTextures = loadPetTextures();
 
     this.ecs.createEntity({
-      id: 'pet',
+      id,
       components: [
         {
           type: CType.CSprite,
@@ -133,8 +136,9 @@ class Game {
         {
           type: CType.CPosition,
           key: 'cPosition',
-          x: 300,
-          y: 200,
+          // x: 300,
+          // y: 200,
+          ...position,
         },
         {
           type: CType.CMass,

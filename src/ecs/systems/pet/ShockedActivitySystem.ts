@@ -1,14 +1,14 @@
 import { Entity, Query, System, World } from 'ape-ecs';
 import { Application, ICanvas } from 'pixi.js';
 import Game from '../../Game';
-import { CActivity, CPlannedActivities, CVelocity } from '../../components';
-import { getNetVelocity } from '../../../utils/velocity';
 import {
-  Activity,
-  ActivityPriority,
-  PetActivity,
-  PlannedActivity,
-} from '../../../types';
+  CActivity,
+  CCollisionEventQueue,
+  CPlannedActivities,
+  CVelocity,
+} from '../../components';
+import { getNetVelocity } from '../../../utils/velocity';
+import { ActivityPriority, PetActivity } from '../../../types';
 import { PetActivitySystem } from './PetActivitySystem';
 
 const FAST_HORIZONTAL_SPEED = 8;
@@ -29,9 +29,11 @@ export class ShockedActivitySystem extends System {
   update = () => {
     this.world
       .createQuery()
-      .fromAll(CPlannedActivities, CActivity, CVelocity)
+      .fromAll(CPlannedActivities, CActivity, CCollisionEventQueue)
       .not(PetActivity.SHOCKED)
-      .execute()
+      .execute({
+        updatedValues: this.world.currentTick - 1,
+      })
       .forEach(this.planActivity);
 
     this.world
@@ -44,15 +46,22 @@ export class ShockedActivitySystem extends System {
   planActivity = (entity: Entity) => {
     const cActivity = entity.c.cActivity as CActivity;
     const { activity } = cActivity;
-    const netVelocity = getNetVelocity(entity);
+    const cCollisionEventQueue = entity.getOne(CCollisionEventQueue);
+    const { events: collisionEvents } = cCollisionEventQueue;
 
-    if (
-      activity.name !== PetActivity.SHOCKED &&
-      netVelocity.y <= FAST_UPWARD_SPEED
-    ) {
+    if (activity.name === PetActivity.SHOCKED || collisionEvents.length === 0) {
+      return;
+    }
+
+    const lastCollision = collisionEvents[collisionEvents.length - 1];
+    if (lastCollision.member1.velocityOut.y <= FAST_UPWARD_SPEED) {
       PetActivitySystem.addPlannedActivity(entity, {
         name: PetActivity.SHOCKED,
         priority: ActivityPriority.REACTION,
+        nextActivity: {
+          name: PetActivity.PECKING,
+          priority: ActivityPriority.GOAL,
+        },
       });
     }
   };

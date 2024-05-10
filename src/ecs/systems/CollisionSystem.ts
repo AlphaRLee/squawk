@@ -1,6 +1,7 @@
 import { Entity, Query, System, World } from 'ape-ecs';
 import {
   CCollidable,
+  CCollisionEventQueue,
   CMass,
   CPosition,
   CType,
@@ -11,6 +12,7 @@ import { Application, ICanvas } from 'pixi.js';
 import Game from '../Game';
 import { Vector } from '../../utils/vector';
 import { getNetVelocity } from '../../utils/velocity';
+import { CollisionEvent, MAX_COLLISION_EVENT_QUEUE_LENGTH } from '../../types';
 
 // FIXME: Type belongs elsewhere
 type BumpBackEntityData = {
@@ -176,6 +178,26 @@ export class CollisionSystem extends System {
 
       this.replaceVelocity(entity1, newVelocity1);
       this.replaceVelocity(entity2, newVelocity2);
+
+      this.emitCollisionEvent(
+        {
+          timestamp: this.world.currentTick,
+          member1: {
+            entityId: entity1.id,
+            velocityIn: velocity1,
+            velocityOut: newVelocity1,
+            canBePushed: cCollidable1.canBePushed,
+          },
+          member2: {
+            entityId: entity2.id,
+            velocityIn: velocity2,
+            velocityOut: newVelocity2,
+            canBePushed: cCollidable2.canBePushed,
+          },
+        },
+        entity1,
+        entity2
+      );
     } else if (cCollidable1.canBePushed && !cCollidable2.canBePushed) {
       this.bumpPushableEntityBack(
         { entity: entity1, netVelocity: velocity1 },
@@ -189,6 +211,26 @@ export class CollisionSystem extends System {
         y: cor * (velocity2.y - velocity1.y) + velocity2.y,
       };
       this.replaceVelocity(entity1, newVelocity1);
+
+      this.emitCollisionEvent(
+        {
+          timestamp: this.world.currentTick,
+          member1: {
+            entityId: entity1.id,
+            velocityIn: velocity1,
+            velocityOut: newVelocity1,
+            canBePushed: cCollidable1.canBePushed,
+          },
+          member2: {
+            entityId: entity2.id,
+            velocityIn: velocity2,
+            velocityOut: velocity2,
+            canBePushed: cCollidable2.canBePushed,
+          },
+        },
+        entity1,
+        entity2
+      );
     } else if (!cCollidable1.canBePushed && cCollidable2.canBePushed) {
       // Opposite of above
       this.bumpPushableEntityBack(
@@ -201,6 +243,26 @@ export class CollisionSystem extends System {
         y: cor * (velocity1.y - velocity2.y) + velocity1.y,
       };
       this.replaceVelocity(entity2, newVelocity2);
+
+      this.emitCollisionEvent(
+        {
+          timestamp: this.world.currentTick,
+          member1: {
+            entityId: entity2.id,
+            velocityIn: velocity2,
+            velocityOut: newVelocity2,
+            canBePushed: cCollidable2.canBePushed,
+          },
+          member2: {
+            entityId: entity1.id,
+            velocityIn: velocity1,
+            velocityOut: velocity1,
+            canBePushed: cCollidable1.canBePushed,
+          },
+        },
+        entity2,
+        entity1
+      );
     }
   };
 
@@ -248,7 +310,6 @@ export class CollisionSystem extends System {
       ...scenario,
       timeInUnpushableRef: scenario.distance / scenario.pVInUnpushableRef,
     }));
-    // .filter((scenario) => scenario.timeInUnpushableRef <= 0);
 
     const collisionScenario = collisionScenarios.reduce(
       (smallestScenario, scenario) =>
@@ -276,5 +337,44 @@ export class CollisionSystem extends System {
       velocity: newVelocity,
       durationType: VelocityDurationType.INFINITE,
     });
+  };
+
+  emitCollisionEvent = (
+    collisionEvent: CollisionEvent,
+    entity1: Entity,
+    entity2: Entity
+  ) => {
+    this.emitCollisionEventToEntity(collisionEvent, entity1);
+    this.emitCollisionEventToEntity(
+      {
+        ...collisionEvent,
+        member1: collisionEvent.member2,
+        member2: collisionEvent.member1,
+      },
+      entity2
+    );
+  };
+
+  emitCollisionEventToEntity = (
+    collisionEvent: CollisionEvent,
+    entity: Entity
+  ) => {
+    const cCollisionEventQueue = entity.getOne(CCollisionEventQueue);
+
+    if (cCollisionEventQueue) {
+      const { events } = cCollisionEventQueue;
+
+      events.push(collisionEvent);
+      if (events.length > MAX_COLLISION_EVENT_QUEUE_LENGTH) {
+        events.shift();
+      }
+
+      cCollisionEventQueue.update();
+    } else {
+      entity.addComponent({
+        type: CType.CCollisionEventQueue,
+        events: [collisionEvent],
+      });
+    }
   };
 }

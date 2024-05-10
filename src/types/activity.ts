@@ -4,6 +4,7 @@ export enum PetActivity {
   IDLE = 'ACTIVITY_IDLE',
   FLYING = 'ACTIVITY_FLYING',
   SHOCKED = 'ACTIVITY_SHOCKED',
+  PECKING = 'ACTIVITY_PECKING',
 }
 
 export enum ActivityPriority {
@@ -24,7 +25,7 @@ export type Activity = PlannedActivity & {
   sinceTick: number;
 };
 
-export type PeckActivity = Activity & {
+export type PeckActivity = PlannedActivity & {
   target: {
     id: string;
     relativePosition: Vector;
