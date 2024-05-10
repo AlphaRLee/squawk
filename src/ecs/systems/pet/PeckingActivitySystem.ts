@@ -48,12 +48,6 @@ export class PeckingActivitySystem extends System {
     if (this.world.currentTick - activity.sinceTick > 48) {
       activity.done = true;
       cActivity.update();
-
-      // FIXME: This belongs in a separated system
-      PetActivitySystem.addPlannedActivity(entity, {
-        name: PetActivity.IDLE,
-        priority: ActivityPriority.IDLE,
-      });
     }
   };
 }

@@ -80,12 +80,6 @@ export class ShockedActivitySystem extends System {
     ) {
       activity.done = true;
       cActivity.update();
-
-      // FIXME: This belongs in a separated system
-      PetActivitySystem.addPlannedActivity(entity, {
-        name: PetActivity.IDLE,
-        priority: ActivityPriority.IDLE,
-      });
     }
   };
 }

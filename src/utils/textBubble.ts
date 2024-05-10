@@ -20,7 +20,10 @@ export function textBubblesInclude(
     const message = caseSensitive
       ? cTextBubble.message
       : cTextBubble.message.toLocaleLowerCase();
-    if (message.includes(searchText)) {
+    if (
+      cTextBubble.timestamp >= world.currentTick - 1 &&
+      message.includes(searchText)
+    ) {
       return true;
     }
   }

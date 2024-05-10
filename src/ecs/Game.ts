@@ -136,8 +136,6 @@ class Game {
         {
           type: CType.CPosition,
           key: 'cPosition',
-          // x: 300,
-          // y: 200,
           ...position,
         },
         {
@@ -201,6 +199,7 @@ class Game {
           type: CType.CTextBubble,
           key: 'cTextBubble',
           message: message.text,
+          timestamp: this.ecs.currentTick,
         },
         {
           type: CType.CPositionAt,
