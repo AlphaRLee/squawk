@@ -58,10 +58,6 @@ export class ShockedActivitySystem extends System {
       PetActivitySystem.addPlannedActivity(entity, {
         name: PetActivity.SHOCKED,
         priority: ActivityPriority.REACTION,
-        nextActivity: {
-          name: PetActivity.PECKING,
-          priority: ActivityPriority.GOAL,
-        },
       });
     }
   };

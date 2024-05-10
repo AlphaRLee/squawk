@@ -1,8 +1,8 @@
 import { System, World } from 'ape-ecs';
-import { CActivity, CAnimatedSprite, CSprite } from '../components';
+import { CActivity, CAnimatedSprite, CSprite, Tags } from '../components';
 import { AnimatedSprite, Application, ICanvas, Sprite } from 'pixi.js';
 import Game from '../Game';
-import { Animation } from '../../types';
+import { Animation, PetActivity } from '../../types';
 import { petAnimations } from '../animations/pet';
 
 export class AnimationSystem extends System {
@@ -24,6 +24,7 @@ export class AnimationSystem extends System {
     this.world
       .createQuery()
       .fromAll(CSprite, CAnimatedSprite, CActivity)
+      .not(Tags.destroyed)
       .execute({
         updatedValues: this.world.currentTick - 1,
       })
@@ -45,11 +46,21 @@ export class AnimationSystem extends System {
 
         cAnimatedSprite.activityName = cActivity.activity.name;
         cAnimatedSprite.update();
-        AnimationSystem.playAnimation(cSprite, newAnimation);
+        AnimationSystem.playAnimation(
+          cSprite,
+          newAnimation,
+          cActivity.activity.name,
+          this.world
+        );
       });
   };
 
-  static playAnimation = (cSprite: CSprite, animation: Animation) => {
+  static playAnimation = (
+    cSprite: CSprite,
+    animation: Animation,
+    activityName: string = undefined,
+    world: World = undefined
+  ) => {
     const animatedSprite = cSprite.sprite;
     if (!(animatedSprite instanceof AnimatedSprite)) {
       throw new Error(
@@ -60,6 +71,27 @@ export class AnimationSystem extends System {
     animatedSprite.animationSpeed = animation.speed;
     animatedSprite.loop = animation.loop;
     animatedSprite.play();
+
+    if (activityName === PetActivity.PECKING) {
+      console.log(
+        `PECK start world tick ${world.currentTick} -----------------`
+      );
+      animatedSprite.onFrameChange = (currentFrame: number) => {
+        console.log(
+          `PECK currentFrame ${currentFrame} world tick ${world.currentTick}`
+        );
+      };
+      animatedSprite.onComplete = () => {
+        console.log(`PECK onComplete world tick ${world.currentTick}`);
+      };
+      animatedSprite.onLoop = () => {
+        console.log(`PECK onLoop world tick ${world.currentTick}`);
+      };
+    } else {
+      animatedSprite.onFrameChange = undefined;
+      animatedSprite.onLoop = undefined;
+      animatedSprite.onComplete = undefined;
+    }
 
     cSprite.update();
   };

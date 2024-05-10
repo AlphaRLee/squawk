@@ -10,19 +10,19 @@ export function createPeckingAnimation(): Animation {
     done: false,
     loop: true,
     frames: [
-      { texture: idleTextures[0] },
+      { texture: idleTextures[0] }, // 0 95
       { texture: idleTextures[0] },
       { texture: idleTextures[0] },
       { texture: peckingTextures[0] },
       { texture: peckingTextures[1] },
-      { texture: peckingTextures[2] },
+      { texture: peckingTextures[2] }, // 5 105
       { texture: peckingTextures[2] },
       { texture: peckingTextures[1] },
       { texture: peckingTextures[0] },
       { texture: peckingTextures[0] },
       { texture: peckingTextures[0] },
       { texture: peckingTextures[1] },
-      { texture: peckingTextures[2] },
+      { texture: peckingTextures[2] }, // 12 123
       { texture: peckingTextures[2] },
       { texture: peckingTextures[1] },
       { texture: peckingTextures[0] },

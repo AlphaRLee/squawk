@@ -18,6 +18,8 @@ import {
   CActivity,
   CSpriteContainer,
   CPlannedActivities,
+  CPeckedEventQueue,
+  CPeckable,
 } from './components';
 import {
   VelocitySystem,
@@ -68,10 +70,12 @@ class Game {
     this.ecs.registerComponent(CCollisionEventQueue);
     this.ecs.registerComponent(CActivity);
     this.ecs.registerComponent(CPlannedActivities);
+    this.ecs.registerComponent(CPeckedEventQueue);
+    this.ecs.registerComponent(CPeckable);
 
     this.createGameEntity();
     this.createPetEntity('pet', { x: 300, y: 200 });
-    this.createPetEntity('pet2', { x: 100, y: 300 });
+    // this.createPetEntity('pet2', { x: 100, y: 300 });
     this.createGroundEntity();
 
     this.ecs.registerSystem(RunType.tick, SpriteSystem);
@@ -185,6 +189,11 @@ class Game {
           canBePushed: false,
           restitution: 0.4,
         },
+        {
+          type: CType.CPeckable,
+          key: 'cPeckable',
+          destroyedOnPeck: false,
+        },
       ],
       tags: [Tags.ground, Tags.new],
     });
@@ -213,6 +222,11 @@ class Game {
           key: 'cCollidable',
           canBePushed: false,
           restitution: 0.6,
+        },
+        {
+          type: CType.CPeckable,
+          key: 'cPeckable',
+          destroyedOnPeck: true,
         },
       ],
       tags: [Tags.new],

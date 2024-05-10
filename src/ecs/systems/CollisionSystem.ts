@@ -13,6 +13,7 @@ import Game from '../Game';
 import { Vector } from '../../utils/vector';
 import { getNetVelocity } from '../../utils/velocity';
 import { CollisionEvent, MAX_COLLISION_EVENT_QUEUE_LENGTH } from '../../types';
+import { getBoundingBox } from '../../utils/position';
 
 // FIXME: Type belongs elsewhere
 type BumpBackEntityData = {
@@ -67,8 +68,8 @@ export class CollisionSystem extends System {
           continue;
         }
 
-        const movedBoundingBox = this.getBoundingBox(recentlyMovedEntity);
-        const collidableBoundingBox = this.getBoundingBox(collidableEntity);
+        const movedBoundingBox = getBoundingBox(recentlyMovedEntity);
+        const collidableBoundingBox = getBoundingBox(collidableEntity);
 
         if (
           movedBoundingBox.left < collidableBoundingBox.right &&
@@ -87,30 +88,30 @@ export class CollisionSystem extends System {
     return collidedPairs;
   };
 
-  getBoundingBox = (
-    entity: Entity
-  ): {
-    left: number;
-    top: number;
-    right: number;
-    bottom: number;
-  } => {
-    const cPos = entity.getOne(CType.CPosition);
-    const cSize = entity.getOne(CType.CSize);
-    const boundingBox = {
-      left: cPos.x,
-      top: cPos.y,
-      right: cPos.x,
-      bottom: cPos.y,
-    };
+  // getBoundingBox = (
+  //   entity: Entity
+  // ): {
+  //   left: number;
+  //   top: number;
+  //   right: number;
+  //   bottom: number;
+  // } => {
+  //   const cPos = entity.getOne(CType.CPosition);
+  //   const cSize = entity.getOne(CType.CSize);
+  //   const boundingBox = {
+  //     left: cPos.x,
+  //     top: cPos.y,
+  //     right: cPos.x,
+  //     bottom: cPos.y,
+  //   };
 
-    if (cSize) {
-      boundingBox.right += cSize.width;
-      boundingBox.bottom += cSize.height;
-    }
+  //   if (cSize) {
+  //     boundingBox.right += cSize.width;
+  //     boundingBox.bottom += cSize.height;
+  //   }
 
-    return boundingBox;
-  };
+  //   return boundingBox;
+  // };
 
   applyCollision = ([entity1, entity2]: [Entity, Entity]) => {
     const cCollidable1 = entity1.getOne(CCollidable);
@@ -275,8 +276,8 @@ export class CollisionSystem extends System {
     const { entity: unpushableEntity, netVelocity: upVelocity } =
       unpushableEntityData;
 
-    const pBB = this.getBoundingBox(pushableEntity);
-    const upBB = this.getBoundingBox(unpushableEntity);
+    const pBB = getBoundingBox(pushableEntity);
+    const upBB = getBoundingBox(unpushableEntity);
 
     const pVelocityInUnpushableRef: Vector = {
       x: pVelocity.x - upVelocity.x,

@@ -27,10 +27,3 @@ export type PlannedActivity = {
 export type Activity = PlannedActivity & {
   sinceTick: number;
 };
-
-export type PeckActivity = PlannedActivity & {
-  target: {
-    id: string;
-    relativePosition: Vector;
-  };
-};

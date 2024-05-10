@@ -2,7 +2,6 @@ import { World, Query, Entity, System } from 'ape-ecs';
 import { AnimatedSprite, Application, ICanvas, Sprite } from 'pixi.js';
 import {
   CAnimatedSprite,
-  CPosition,
   CSprite,
   CSpriteContainer,
   CType,
@@ -40,6 +39,15 @@ export class SpriteSystem extends System {
     // FIXME: Why is this.spriteQuery and all other things set in init() always undefined? Fall back to this.queries?
     this.spriteQuery?.execute().forEach(this.createSprite);
     this.animatedSpriteQuery?.execute().forEach(this.createAnimatedSprite);
+
+    this.createQuery()
+      .fromAll(CSprite, Tags.destroyRequested)
+      .execute()
+      .forEach(this.destroySprite);
+    this.createQuery()
+      .fromAll(CSpriteContainer, Tags.destroyRequested)
+      .execute()
+      .forEach(this.destroySpriteContainer);
   }
 
   createSprite = (entity: Entity): void => {
@@ -101,5 +109,39 @@ export class SpriteSystem extends System {
       petAnimations[cAnimSprite.activityName]
     );
     entity.removeTag(Tags.new);
+  };
+
+  destroySprite = (entity: Entity) => {
+    if (!entity) return;
+    const cSprites = entity?.getComponents(CSprite);
+    cSprites.forEach((cSprite) => {
+      const sprite = cSprite.sprite;
+      if (!sprite) return;
+
+      sprite.removeFromParent();
+      sprite.destroy({ children: true });
+
+      cSprite.update();
+    });
+
+    // FIXME: entity.destroy needs a much bigger module to house it
+    entity.destroy();
+  };
+
+  destroySpriteContainer = (entity: Entity) => {
+    if (!entity) return;
+    const cSpriteContainers = entity?.getComponents(CSpriteContainer);
+    cSpriteContainers.forEach((cSpriteContainer) => {
+      const container = cSpriteContainer.container;
+      if (!container) return;
+
+      container.removeFromParent();
+      container.destroy({ children: true });
+
+      cSpriteContainer.update();
+    });
+
+    // FIXME: entity.destroy needs a much bigger module to house it
+    entity.destroy();
   };
 }

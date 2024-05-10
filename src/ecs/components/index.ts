@@ -15,6 +15,8 @@ export * from './CCollidable';
 export * from './CCollisionEventQueue';
 export * from './CActivity';
 export * from './CPlannedActivities';
+export * from './CPeckedEventQueue';
+export * from './CPeckable';
 
 export enum CType {
   'CGame' = 'CGame',
@@ -33,4 +35,6 @@ export enum CType {
   'CTextBubble' = 'CTextBubble',
   'CActivity' = 'CActivity',
   'CPlannedActivities' = 'CPlannedActivities',
+  'CPeckedEventQueue' = 'CPeckedEventQueue',
+  'CPeckable' = 'CPeckable',
 }
