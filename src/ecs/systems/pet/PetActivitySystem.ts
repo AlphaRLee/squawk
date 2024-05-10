@@ -1,60 +1,130 @@
-import { Entity, System, World } from 'ape-ecs';
+import { Entity, Query, System, World } from 'ape-ecs';
 import { Application, ICanvas } from 'pixi.js';
 import Game from '../../Game';
-import { CActivity, CVelocity } from '../../components';
+import { CActivity, CPlannedActivities, CVelocity } from '../../components';
 import { getNetVelocity } from '../../../utils/velocity';
-import { PetActivity } from '../../../types';
-
-const FAST_HORIZONTAL_SPEED = 8;
-const FAST_UPWARD_SPEED = -5;
-const FAST_DOWNWARD_SPEED = 5;
+import {
+  Activity,
+  ActivityPriority,
+  PetActivity,
+  PlannedActivity,
+} from '../../../types';
 
 // TODO: In an ideal world, this is abstracted out to not be dependent on pet
 export class PetActivitySystem extends System {
   game: Game;
   app: Application<ICanvas>;
+  activityQuery: Query;
 
   constructor(world: World, ...args: any[]) {
     super(world, ...args);
 
     this.game = this.world.getEntity('game').c.cGame.game;
     this.app = this.game.app;
+
+    this.activityQuery = this.world
+      .createQuery()
+      .fromAll(CPlannedActivities, CActivity, CVelocity);
   }
 
   update = () => {
-    this.world
-      .createQuery()
-      .fromAll(CActivity, CVelocity)
-      .execute()
-      .forEach(this.reactToVelocity);
+    this.activityQuery
+      .execute({
+        updatedValues: this.world.currentTick - 1,
+      })
+      .forEach(this.executePlannedActivity);
   };
 
-  reactToVelocity = (entity: Entity) => {
-    // FIXME: Oversimplified - for now, assume simply going up at a fast velocity means be shocked
+  static addPlannedActivity = (
+    entity: Entity,
+    plannedActivity: PlannedActivity
+  ) => {
+    const cPlannedActivities = entity.c
+      .cPlannedActivities as CPlannedActivities;
+    cPlannedActivities.plannedActivities.push(plannedActivity);
+    cPlannedActivities.update();
+  };
+
+  executePlannedActivity = (entity: Entity): void => {
     const cActivity = entity.c.cActivity as CActivity;
-    const netVelocity = getNetVelocity(entity);
+    const currentActivity = cActivity.activity;
+    const cPlannedActivities = entity.c
+      .cPlannedActivities as CPlannedActivities;
+    let { plannedActivities } = cPlannedActivities;
 
-    if (
-      cActivity.name !== PetActivity.SHOCKED &&
-      netVelocity.y <= FAST_UPWARD_SPEED
-    ) {
-      this.updateActivity(cActivity, PetActivity.SHOCKED);
+    this.clearDonePlannedActivities(cPlannedActivities);
+    plannedActivities = cPlannedActivities.plannedActivities;
+    if (!plannedActivities.length) return;
+
+    const nextActivityIndex =
+      this.getNextPlannedActivityIndex(plannedActivities);
+    const nextActivity = plannedActivities[nextActivityIndex];
+
+    if (currentActivity.done) {
+      if (currentActivity.nextActivity) {
+        PetActivitySystem.addPlannedActivity(
+          entity,
+          currentActivity.nextActivity
+        );
+      }
+      this.updateActivity(entity, nextActivityIndex);
+      return;
     }
 
-    if (
-      cActivity.name !== PetActivity.IDLE &&
-      this.world.currentTick - cActivity.sinceTick > 60 &&
-      Math.abs(netVelocity.x) < FAST_HORIZONTAL_SPEED &&
-      netVelocity.y > FAST_UPWARD_SPEED &&
-      netVelocity.y < FAST_DOWNWARD_SPEED
-    ) {
-      this.updateActivity(cActivity, PetActivity.IDLE);
+    if (nextActivity.priority >= currentActivity.priority) {
+      PetActivitySystem.addPlannedActivity(entity, currentActivity);
+      this.updateActivity(entity, nextActivityIndex);
     }
   };
 
-  updateActivity = (cActivity: CActivity, name: PetActivity): void => {
-    cActivity.name = name;
-    cActivity.sinceTick = this.world.currentTick;
-    cActivity.update();
+  clearDonePlannedActivities = (cPlannedActivities: CPlannedActivities) => {
+    const { plannedActivities } = cPlannedActivities;
+
+    if (!plannedActivities.length) return;
+
+    // Get activities that are not done (i.e. undefined or false)
+    const recentlyPlannedActivities = plannedActivities.filter(
+      (plannedActivity) => !plannedActivity.done
+    );
+
+    if (recentlyPlannedActivities.length < plannedActivities.length) {
+      cPlannedActivities.plannedActivities = recentlyPlannedActivities;
+      cPlannedActivities.update();
+    }
+  };
+
+  getNextPlannedActivityIndex = (plannedActivities: PlannedActivity[]) =>
+    plannedActivities.reduce(
+      (
+        priorityActivityIndex: number,
+        plannedActivity: PlannedActivity,
+        plannedActivityIndex: number
+      ) => {
+        if (priorityActivityIndex < 0) return plannedActivityIndex;
+        const priorityActivity = plannedActivities[priorityActivityIndex];
+        return plannedActivity.priority > priorityActivity.priority
+          ? plannedActivityIndex
+          : priorityActivityIndex;
+      },
+      -1
+    );
+
+  updateActivity = (entity: Entity, plannedActivityIndex: number): void => {
+    const cActivity = entity.c.cActivity as CActivity;
+    const currentActivity = cActivity.activity;
+    const cPlannedActivities = entity.c
+      .cPlannedActivities as CPlannedActivities;
+    const { plannedActivities } = cPlannedActivities;
+    const plannedActivity = plannedActivities[plannedActivityIndex];
+
+    entity.removeTag(currentActivity.name);
+    cActivity.activity = {
+      ...plannedActivity,
+      sinceTick: this.world.currentTick,
+    };
+    entity.addTag(plannedActivity.name);
+
+    cPlannedActivities.plannedActivities.splice(plannedActivityIndex, 1);
+    cPlannedActivities.update();
   };
 }

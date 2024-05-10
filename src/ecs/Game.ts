@@ -16,6 +16,7 @@ import {
   CMass,
   CActivity,
   CSpriteContainer,
+  CPlannedActivities,
 } from './components';
 import {
   VelocitySystem,
@@ -25,6 +26,7 @@ import {
   CollisionSystem,
   PositionSystem,
   BackgroundSceneSystem,
+  registerActivitySystems,
 } from './systems';
 import loadPetTextures from '../utils/loadPetTextures';
 import { MessageData, PetActivity } from '../types';
@@ -48,7 +50,9 @@ class Game {
     this.size = options.size;
     this.ecs = new World();
 
-    this.ecs.registerTags(...Object.keys(Tags));
+    this.ecs.registerTags(
+      ...[...Object.keys(Tags), ...Object.values(PetActivity)]
+    );
     this.ecs.registerComponent(CGame, 1);
     this.ecs.registerComponent(CSprite);
     this.ecs.registerComponent(CSpriteContainer);
@@ -61,6 +65,7 @@ class Game {
     this.ecs.registerComponent(CTextBubble);
     this.ecs.registerComponent(CCollidable);
     this.ecs.registerComponent(CActivity);
+    this.ecs.registerComponent(CPlannedActivities);
 
     this.createGameEntity();
     this.createPetEntity();
@@ -74,6 +79,8 @@ class Game {
     this.ecs.registerSystem(RunType.tick, VelocitySystem);
     this.ecs.registerSystem(RunType.tick, CollisionSystem);
     this.ecs.registerSystem(RunType.tick, GravitySystem);
+
+    registerActivitySystems(this.ecs);
     this.ecs.registerSystem(RunType.tick, PetActivitySystem);
 
     // TODO: Add event listeners here? Good for mouse press types
@@ -143,6 +150,11 @@ class Game {
           type: CType.CActivity,
           key: 'cActivity',
           name: PetActivity.IDLE,
+        },
+        {
+          type: CType.CPlannedActivities,
+          key: 'cPlannedActivities',
+          plannedActivities: [],
         },
       ],
       tags: [Tags.new, Tags.interactiveSprite, Tags.gravity],

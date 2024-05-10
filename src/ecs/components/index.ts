@@ -13,6 +13,7 @@ export * from './CMass';
 export * from './CMomentum';
 export * from './CCollidable';
 export * from './CActivity';
+export * from './CPlannedActivities';
 
 export enum CType {
   'CGame' = 'CGame',
@@ -30,4 +31,5 @@ export enum CType {
   'CText' = 'CText',
   'CTextBubble' = 'CTextBubble',
   'CActivity' = 'CActivity',
+  'CPlannedActivities' = 'CPlannedActivities',
 }

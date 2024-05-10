@@ -18,9 +18,3 @@ export type AnimationFrame = {
   // Optional velocity to apply to the sprite
   velocity?: Vector;
 };
-
-export enum PetActivity {
-  IDLE = 'idle',
-  FLYING = 'flying',
-  SHOCKED = 'shocked',
-}

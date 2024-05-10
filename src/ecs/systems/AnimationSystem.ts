@@ -33,17 +33,17 @@ export class AnimationSystem extends System {
         const cActivity = entity.c.cActivity as CActivity;
 
         // If activity is still the same as the animation, do nothing
-        if (cAnimatedSprite.activityName === cActivity.name) return;
+        if (cAnimatedSprite.activityName === cActivity.activity.name) return;
 
         // TODO: Tightly coupled, only pet animations are allowed
-        const newAnimation = petAnimations[cActivity.name];
+        const newAnimation = petAnimations[cActivity.activity.name];
         if (!newAnimation) {
           throw new Error(
-            `Entity ${entity.id} has activity ${cActivity.id} ${cActivity.name} but no matching animation found`
+            `Entity ${entity.id} has activity ${cActivity.id} ${cActivity.activity.name} but no matching animation found`
           );
         }
 
-        cAnimatedSprite.activityName = cActivity.name;
+        cAnimatedSprite.activityName = cActivity.activity.name;
         cAnimatedSprite.update();
         AnimationSystem.playAnimation(cSprite, newAnimation);
       });
