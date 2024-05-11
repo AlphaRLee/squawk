@@ -1,5 +1,5 @@
 import { Texture, BaseTexture, Rectangle, SCALE_MODES } from 'pixi.js';
-const groundSpriteSheetImg = '/assets/CloudSprite.png';
+import cloudSpriteSheetImg from '../assets/CloudSprite.png';
 
 export type CloudTextures = {
   small1: Texture;
@@ -16,7 +16,7 @@ let cloudTextures: CloudTextures | undefined;
 const loadCloudTextures = (): CloudTextures => {
   if (cloudTextures) return cloudTextures;
 
-  const baseTexture = BaseTexture.from(groundSpriteSheetImg);
+  const baseTexture = BaseTexture.from(cloudSpriteSheetImg);
   baseTexture.scaleMode = SCALE_MODES.NEAREST;
 
   cloudTextures = {

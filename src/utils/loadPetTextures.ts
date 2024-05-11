@@ -1,5 +1,5 @@
 import { Texture, BaseTexture, Rectangle, SCALE_MODES } from 'pixi.js';
-const petSpriteSheetImg = '/assets/BirdSprite.png';
+import petSpriteSheetImg from '../assets/BirdSprite.png';
 
 export type PetAnimationTextures = {
   idle: Texture[];

@@ -1,6 +1,7 @@
 {
   "name": "squawk",
   "version": "0.1.0",
+  "homepage": "https://alpharlee.github.io/squawk",
   "private": true,
   "scripts": {
     "start": "react-scripts start",
@@ -8,7 +9,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "predeploy": "npx webpack",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build --add"
   },
   "dependencies": {
     "@pixi/react": "^7.0.3",
@@ -24,6 +25,11 @@
     "web-vitals": "^2.1.4"
   },
   "devDependencies": {
+    "copy-webpack-plugin": "^12.0.2",
+    "file-loader": "^6.2.0",
+    "gh-pages": "^6.1.1",
+    "ts-loader": "^9.5.1",
+    "url-loader": "^4.1.1",
     "webpack-cli": "^5.1.4"
   },
   "eslintConfig": {
@@ -65,5 +71,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }  
+  }
 }

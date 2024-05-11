@@ -1,5 +1,5 @@
 import { Texture, BaseTexture, Rectangle, SCALE_MODES } from 'pixi.js';
-const textBubbleSpriteSheetImg = '/assets/TextBubbleSprite.png';
+import textBubbleSpriteSheetImg from '../assets/TextBubbleSprite.png';
 
 export type TextBubbleTextures = {
   side: {

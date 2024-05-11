@@ -1,6 +1,14 @@
 # Squawk
 
+Meet your new friend in this mock messenger app.
+Type messages in the bottom! Try typing a message including the word `peck`!
+
 Credits to ma9ici4n for [original bird sprite art](https://ma9ici4n.itch.io/pixel-art-bird-16x16), extended sprite art created by me
+
+# Try it out!
+This site is deployed live to https://alpharlee.github.io/squawk/
+
+[This tutorial](https://github.com/gitname/react-gh-pages) was used to deploy GitHub pages
 
 # Getting Started with Create React App
 

@@ -1,5 +1,5 @@
 import { Texture, BaseTexture, Rectangle, SCALE_MODES } from 'pixi.js';
-const groundSpriteSheetImg = '/assets/GroundSprite.png';
+import groundSpriteSheetImg from '../assets/GroundSprite.png';
 
 export type GroundTextures = {
   base: Texture;

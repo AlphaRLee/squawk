@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebPackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   mode: 'development',
@@ -7,18 +8,18 @@ module.exports = {
     path: path.resolve(__dirname, 'build'),
     filename: 'bundle.js',
   },
-  // devServer: {
-  //   static: path.resolve(__dirname, 'build'),
-  //   compress: true,
-  //   port: 8080,
-  // },
-  // devtool: 'inline-source-map',
-  // resolve: {
-  //   modules: [path.join(__dirname, 'src'), 'node_modules'],
-  //   alias: {
-  //     react: path.join(__dirname, 'node_modules', 'react'),
-  //   },
-  // },
+  devServer: {
+    static: path.resolve(__dirname, 'build'),
+    compress: true,
+    port: 8080,
+  },
+  devtool: 'inline-source-map',
+  resolve: {
+    modules: [path.join(__dirname, 'src'), 'node_modules'],
+    alias: {
+      react: path.join(__dirname, 'node_modules', 'react'),
+    },
+  },
   module: {
     rules: [
       {
@@ -85,6 +86,9 @@ module.exports = {
   plugins: [
     new HtmlWebPackPlugin({
       template: './src/index.html',
+    }),
+    new CopyWebpackPlugin({
+      patterns: [{ from: './src/assets', to: 'assets' }],
     }),
   ],
 };

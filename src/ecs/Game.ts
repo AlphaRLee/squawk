@@ -79,7 +79,7 @@ class Game {
     this.createGameEntity();
     this.createGroundEntity();
     this.createCloudEntities();
-    this.createPetEntity('pet', { x: 300, y: 200 });
+    this.createPetEntity('pet', { x: this.size.width * 0.6, y: 200 });
     // this.createPetEntity('pet2', { x: 100, y: 300 });
     this.app.stage.sortableChildren = true;
 
@@ -224,7 +224,7 @@ class Game {
           {
             type: CType.CVelocity,
             velocity: {
-              x: Math.random() * 2 + 0.5,
+              x: Math.random() * 2 + 0.01,
               y: 0,
             },
             durationType: VelocityDurationType.INFINITE,
