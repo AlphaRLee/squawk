@@ -20,6 +20,8 @@ import {
   CPlannedActivities,
   CPeckedEventQueue,
   CPeckable,
+  VelocityDurationType,
+  CCloud,
 } from './components';
 import {
   VelocitySystem,
@@ -65,6 +67,7 @@ class Game {
     this.ecs.registerComponent(CSize);
     this.ecs.registerComponent(CMass);
     this.ecs.registerComponent(CVelocity);
+    this.ecs.registerComponent(CCloud);
     this.ecs.registerComponent(CTextBubble);
     this.ecs.registerComponent(CCollidable);
     this.ecs.registerComponent(CCollisionEventQueue);
@@ -74,9 +77,11 @@ class Game {
     this.ecs.registerComponent(CPeckable);
 
     this.createGameEntity();
+    this.createGroundEntity();
+    this.createCloudEntities();
     this.createPetEntity('pet', { x: 300, y: 200 });
     // this.createPetEntity('pet2', { x: 100, y: 300 });
-    this.createGroundEntity();
+    this.app.stage.sortableChildren = true;
 
     this.ecs.registerSystem(RunType.tick, SpriteSystem);
     this.ecs.registerSystem(RunType.tick, BackgroundSceneSystem);
@@ -197,6 +202,38 @@ class Game {
       ],
       tags: [Tags.ground, Tags.new],
     });
+  }
+
+  createCloudEntities(): void {
+    const nClouds = Math.floor(Math.random() * 6) + 3;
+    for (let i = 0; i < nClouds; i++) {
+      this.ecs.createEntity({
+        components: [
+          {
+            type: CType.CCloud,
+            key: 'cCloud',
+            startingPosition: { x: 0, y: 0 },
+            screenWidth: this.size.width,
+          },
+          {
+            type: CType.CPosition,
+            key: 'cPosition',
+            x: Math.floor(Math.random() * this.size.width * 1.2) - 100,
+            y: Math.floor(Math.random() * 200) - 10,
+          },
+          {
+            type: CType.CVelocity,
+            velocity: {
+              x: Math.random() * 2 + 0.5,
+              y: 0,
+            },
+            durationType: VelocityDurationType.INFINITE,
+            duration: -1 as number,
+          },
+        ],
+        tags: [Tags.new],
+      });
+    }
   }
 
   createTextBubble(message: MessageData) {

@@ -8,6 +8,7 @@ export * from './CPosition';
 export * from './CPositionAt';
 export * from './CSize';
 export * from './CVelocity';
+export * from './CCloud';
 export * from './CTextBubble';
 export * from './CMass';
 export * from './CMomentum';
@@ -32,6 +33,7 @@ export enum CType {
   'CMomentum' = 'CMomentum',
   'CCollidable' = 'CCollidable',
   'CCollisionEventQueue' = 'CCollisionEventQueue',
+  'CCloud' = 'CCloud',
   'CTextBubble' = 'CTextBubble',
   'CActivity' = 'CActivity',
   'CPlannedActivities' = 'CPlannedActivities',
